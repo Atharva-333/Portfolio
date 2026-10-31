@@ -403,9 +403,6 @@ function TechReactor() {
     my.set(0);
   };
 
-  // ↓ tighter box on mobile; icons must fit inside RADIUS*2 + iconSize
-  const maxWidth = RADIUS * 2 + iconSize + (size === "sm" ? 8 : 24);
-
   return (
     <div className="flex w-full flex-col items-center gap-3">
       <div
