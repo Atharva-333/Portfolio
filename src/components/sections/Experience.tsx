@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 export default function Experience() {
   return (
     <Reveal>
-      <section id="experience" className="py-24 scroll-mt-20">
+      <section id="experience" className="py-24 scroll-mt-20 snap-start">
         <SectionHeading
           title="Experience"
           subtitle="Real-world software development experience."
