@@ -6,25 +6,35 @@ import {
   useReducedMotion,
   useSpring,
   useTransform,
-  type MotionValue,
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Reveal from "../ui/Reveal";
 import { technologies } from "@/data/portfolio";
 
-/* ---------------- utils ---------------- */
+/* ---------------- breakpoint hook ---------------- */
 
-function useSmallScreen() {
-  const [small, setSmall] = useState(false);
+function useSize() {
+  const [size, setSize] = useState<"sm" | "md" | "lg">("md");
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 640px)");
-    setSmall(mq.matches);
-    const onChange = () => setSmall(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    const smMq = window.matchMedia("(max-width: 640px)");
+    const lgMq = window.matchMedia("(min-width: 1024px)");
+    const update = () => {
+      if (smMq.matches) setSize("sm");
+      else if (lgMq.matches) setSize("lg");
+      else setSize("md");
+    };
+    update();
+    smMq.addEventListener("change", update);
+    lgMq.addEventListener("change", update);
+    return () => {
+      smMq.removeEventListener("change", update);
+      lgMq.removeEventListener("change", update);
+    };
   }, []);
-  return small;
+  return size;
 }
+
+/* ---------------- Fibonacci distribution ---------------- */
 
 function fibSphere(i: number, n: number, R: number) {
   const phi = Math.acos(1 - (2 * (i + 0.5)) / n);
@@ -36,7 +46,7 @@ function fibSphere(i: number, n: number, R: number) {
   };
 }
 
-/* ---------------- one tech node on the sphere ---------------- */
+/* ---------------- one tech node ---------------- */
 
 type TechNodeProps = {
   tech: (typeof technologies)[number];
@@ -44,7 +54,10 @@ type TechNodeProps = {
   total: number;
   radius: number;
   iconSize: number;
-  rotation: MotionValue<number>;
+  rotX: ReturnType<typeof useMotionValue<number>>;
+  rotY: ReturnType<typeof useMotionValue<number>>;
+  parallaxX: ReturnType<typeof useSpring>;
+  parallaxY: ReturnType<typeof useSpring>;
   hovered: boolean;
   onHover: (name: string | null) => void;
 };
@@ -55,59 +68,128 @@ function TechNode({
   total,
   radius,
   iconSize,
-  rotation,
+  rotX,
+  rotY,
+  parallaxX,
+  parallaxY,
   hovered,
   onHover,
 }: TechNodeProps) {
   const Icon = tech.icon;
-  const p = fibSphere(index, total, radius);
+  const p = useMemo(
+    () => fibSphere(index, total, radius),
+    [index, total, radius],
+  );
 
-  const x = useTransform(rotation, (deg) => {
-    const r = (deg * Math.PI) / 180;
-    return p.x * Math.cos(r) + p.z * Math.sin(r);
-  });
-  const z = useTransform(rotation, (deg) => {
-    const r = (deg * Math.PI) / 180;
-    return -p.x * Math.sin(r) + p.z * Math.cos(r);
-  });
-  const opacity = useTransform(z, [-radius, radius], [0.4, 1]);
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  /* full 3D projection: rotY → rotX → perspective */
+  const computed = useTransform(
+    [rotX, rotY, parallaxX, parallaxY],
+    ([rx, ry, px, py]) => {
+      const finalRx = ((rx as number) + (px as number)) * (Math.PI / 180);
+      const finalRy = ((ry as number) + (py as number)) * (Math.PI / 180);
+
+      const cosRy = Math.cos(finalRy);
+      const sinRy = Math.sin(finalRy);
+      const cosRx = Math.cos(finalRx);
+      const sinRx = Math.sin(finalRx);
+
+      // Y-axis rotation
+      const x1 = p.x * cosRy + p.z * sinRy;
+      const z1 = -p.x * sinRy + p.z * cosRy;
+
+      // X-axis rotation
+      const y2 = p.y * cosRx - z1 * sinRx;
+      const z2 = p.y * sinRx + z1 * cosRx;
+
+      // Perspective
+      const perspective = radius * 2.5;
+      const scale = perspective / (perspective + z2);
+      const screenX = x1 * scale;
+      const screenY = y2 * scale;
+
+      // Depth: z2 = +radius is back, -radius is front
+      const depth = (z2 + radius) / (2 * radius);
+      const opacity = 1 - depth * 0.6;
+      const zIndex = Math.round(1000 - z2 * 2);
+
+      return { x: screenX, y: screenY, scale, opacity, zIndex };
+    },
+  );
+
+  const x = useTransform(computed, (v) => v.x);
+  const y = useTransform(computed, (v) => v.y);
+  const scale = useTransform(computed, (v) => v.scale);
+  const opacity = useTransform(computed, (v) => v.opacity);
+  const zIndexValue = useTransform(computed, (v) => v.zIndex);
+
+  /* Set z-index imperatively — avoids MotionValue<number> in style,
+     and lets us hard-pin to 9999 on hover without a separate MV. */
+  useEffect(() => {
+    const apply = (v: number) => {
+      if (nodeRef.current) {
+        nodeRef.current.style.zIndex = String(Math.round(v));
+      }
+    };
+
+    if (hovered) {
+      apply(9999);
+      return;
+    }
+
+    apply(zIndexValue.get());
+    return zIndexValue.on("change", apply);
+  }, [zIndexValue, hovered]);
 
   return (
     <motion.div
-      className="pointer-events-none absolute left-1/2 top-1/2"
+      ref={nodeRef}
+      className="absolute left-1/2 top-1/2"
       style={{
         x,
-        y: p.y,
-        z,
-        opacity,
+        y,
         width: iconSize,
         height: iconSize,
         marginLeft: -iconSize / 2,
         marginTop: -iconSize / 2,
       }}
     >
-      <motion.button
-        type="button"
-        aria-label={tech.name}
-        onMouseEnter={() => onHover(tech.name)}
-        onMouseLeave={() => onHover(null)}
-        onFocus={() => onHover(tech.name)}
-        onBlur={() => onHover(null)}
-        animate={{ scale: hovered ? 1.4 : 1 }}
-        transition={{ type: "spring", stiffness: 320, damping: 20 }}
-        className="pointer-events-auto flex items-center justify-center rounded-xl border bg-slate-900/90 backdrop-blur-md transition-colors duration-200"
-        style={{
-          width: iconSize,
-          height: iconSize,
-          borderColor: hovered ? "rgba(96,165,250,0.9)" : "rgba(51,65,85,0.9)",
-          color: hovered ? "#93c5fd" : "#cbd5e1",
-          boxShadow: hovered
-            ? "0 0 28px 6px rgba(59,130,246,0.55), inset 0 0 12px rgba(96,165,250,0.25)"
-            : "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        <Icon className={iconSize > 40 ? "h-5 w-5" : "h-4 w-4"} />
-      </motion.button>
+      <motion.div style={{ scale }} className="relative">
+        <motion.button
+          type="button"
+          aria-label={tech.name}
+          onMouseEnter={() => onHover(tech.name)}
+          onMouseLeave={() => onHover(null)}
+          onFocus={() => onHover(tech.name)}
+          onBlur={() => onHover(null)}
+          style={{ opacity }}
+          animate={{ scale: hovered ? 1.25 : 1 }}
+          transition={{ type: "spring", stiffness: 320, damping: 20 }}
+          className="flex items-center justify-center rounded-xl border backdrop-blur-md transition-colors duration-200"
+        >
+          <span
+            className="flex items-center justify-center"
+            style={{
+              width: iconSize,
+              height: iconSize,
+              borderRadius: Math.max(8, iconSize * 0.28),
+              borderColor: hovered
+                ? "rgba(96,165,250,0.9)"
+                : "rgba(51,65,85,0.9)",
+              color: hovered ? "#93c5fd" : "#cbd5e1",
+              background: "rgba(15,23,42,0.9)",
+              borderWidth: 1,
+              borderStyle: "solid",
+              boxShadow: hovered
+                ? "0 0 28px 6px rgba(59,130,246,0.55), inset 0 0 12px rgba(96,165,250,0.25)"
+                : "0 4px 12px rgba(0,0,0,0.3)",
+            }}
+          >
+            <Icon style={{ width: iconSize * 0.48, height: iconSize * 0.48 }} />
+          </span>
+        </motion.button>
+      </motion.div>
 
       <AnimatePresence>
         {hovered && (
@@ -116,7 +198,7 @@ function TechNode({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.16 }}
-            className="pointer-events-none absolute left-1/2 top-full mt-4 -translate-x-1/2 whitespace-nowrap rounded-md border border-blue-500/40 bg-slate-950/95 px-2.5 py-1 text-[10px] font-medium text-blue-200 shadow-lg shadow-blue-500/20"
+            className="pointer-events-none absolute left-1/2 top-full mt-6 -translate-x-1/2 whitespace-nowrap rounded-md border border-blue-500/40 bg-slate-950/95 px-2.5 py-1 text-[10px] font-medium text-blue-200 shadow-lg shadow-blue-500/20"
           >
             {tech.name}
           </motion.div>
@@ -180,40 +262,38 @@ function EnergyCore({
           className="relative text-base font-bold text-white"
           style={{ textShadow: "0 1px 0 rgba(0,0,0,0.4)" }}
         >
-          AL
+          {"</>"}
         </span>
       </div>
     </div>
   );
 }
 
-/* ---------------- orbital guide ring ---------------- */
+/* ---------------- orbital guide rings ---------------- */
 
 function OrbitalRing({
   radius,
-  tilt,
-  speed,
-  reduced,
+  scaleY,
+  rotate,
+  opacity,
 }: {
   radius: number;
-  tilt: number;
-  speed: number;
-  reduced: boolean;
+  scaleY: number;
+  rotate: number;
+  opacity: number;
 }) {
   return (
-    <motion.div
+    <div
       aria-hidden
-      className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border border-dashed border-slate-700/50"
+      className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border border-dashed border-slate-700/40"
       style={{
         width: radius * 2,
         height: radius * 2,
         marginLeft: -radius,
         marginTop: -radius,
-        transformStyle: "preserve-3d",
-        rotateX: tilt,
+        transform: `rotate(${rotate}deg) scaleY(${scaleY})`,
+        opacity,
       }}
-      animate={reduced ? undefined : { rotateZ: [0, 360] }}
-      transition={{ duration: 60 / speed, repeat: Infinity, ease: "linear" }}
     />
   );
 }
@@ -222,30 +302,42 @@ function OrbitalRing({
 
 function TechReactor() {
   const reduced = useReducedMotion() ?? false;
-  const small = useSmallScreen();
-  const RADIUS = small ? 78 : 125;
-  const ICON_SIZE = small ? 32 : 44;
+  const size = useSize();
+
+  const RADIUS = size === "sm" ? 120 : size === "md" ? 180 : 240;
+  const baseIcon = size === "sm" ? 34 : size === "md" ? 42 : 48;
+
+  /* Icon size auto-shrinks as more skills are added */
+  const iconSize = Math.max(
+    22,
+    Math.min(baseIcon, Math.floor(RADIUS / Math.sqrt(technologies.length))),
+  );
 
   const [hovered, setHovered] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const rotation = useMotionValue(0);
-  const velocity = useRef(0);
-  const lastPointerX = useRef(0);
-  const sceneRef = useRef<HTMLDivElement>(null);
 
-  /* parallax */
+  /* rotation state */
+  const rotX = useMotionValue(0);
+  const rotY = useMotionValue(0);
+  const velX = useRef(0);
+  const velY = useRef(0);
+  const lastPointer = useRef({ x: 0, y: 0 });
+
+  /* parallax tilt from mouse */
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const tiltX = useSpring(useTransform(my, [-0.5, 0.5], [10, -10]), {
-    stiffness: 120,
+  const parallaxX = useSpring(useTransform(my, [-0.5, 0.5], [-4, 4]), {
+    stiffness: 80,
     damping: 20,
   });
-  const tiltY = useSpring(useTransform(mx, [-0.5, 0.5], [-12, 12]), {
-    stiffness: 120,
+  const parallaxY = useSpring(useTransform(mx, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 80,
     damping: 20,
   });
 
-  /* auto-rotate + momentum decay */
+  const sceneRef = useRef<HTMLDivElement>(null);
+
+  /* ---- auto-rotate + momentum decay ---- */
   useEffect(() => {
     if (reduced) return;
     let raf = 0;
@@ -254,95 +346,109 @@ function TechReactor() {
       const dt = Math.min(now - last, 64);
       last = now;
       if (!dragging) {
-        rotation.set(rotation.get() + dt * 0.012 + velocity.current);
-        velocity.current *= 0.94;
-        if (Math.abs(velocity.current) < 0.02) velocity.current = 0;
+        rotY.set(rotY.get() + dt * 0.012 + velY.current);
+        rotX.set(rotX.get() + velX.current);
+        velX.current *= 0.94;
+        velY.current *= 0.94;
+        if (Math.abs(velX.current) < 0.02) velX.current = 0;
+        if (Math.abs(velY.current) < 0.02) velY.current = 0;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [dragging, reduced, rotation]);
+  }, [dragging, reduced, rotX, rotY]);
 
-  /* drag — window-level listeners so it works anywhere on the page */
+  /* ---- drag in both axes with momentum ---- */
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: PointerEvent) => {
-      const dx = e.clientX - lastPointerX.current;
-      lastPointerX.current = e.clientX;
-      const delta = dx * 0.6;
-      rotation.set(rotation.get() + delta);
-      velocity.current = delta * 0.5;
+      const dx = e.clientX - lastPointer.current.x;
+      const dy = e.clientY - lastPointer.current.y;
+      lastPointer.current = { x: e.clientX, y: e.clientY };
+
+      const dY = dx * 0.5;
+      const dX = dy * 0.5;
+
+      rotY.set(rotY.get() + dY);
+      rotX.set(rotX.get() + dX);
+
+      velY.current = dY * 0.5;
+      velX.current = dX * 0.5;
     };
-    const onUp = () => setDragging(false);
+    const end = () => setDragging(false);
+
     window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
     return () => {
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
     };
-  }, [dragging, rotation]);
+  }, [dragging, rotX, rotY]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     setDragging(true);
-    lastPointerX.current = e.clientX;
-    velocity.current = 0;
+    lastPointer.current = { x: e.clientX, y: e.clientY };
+    velX.current = 0;
+    velY.current = 0;
+    /* freeze parallax so drag doesn't double-count */
+    mx.set(0);
+    my.set(0);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!sceneRef.current) return;
+    if (dragging || !sceneRef.current) return;
     const r = sceneRef.current.getBoundingClientRect();
     mx.set((e.clientX - r.left) / r.width - 0.5);
     my.set((e.clientY - r.top) / r.height - 0.5);
   };
 
   const handlePointerLeave = () => {
-    if (!dragging) {
-      mx.set(0);
-      my.set(0);
-    }
+    if (dragging) return;
+    mx.set(0);
+    my.set(0);
   };
 
-  return (
-    <div
-      ref={sceneRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className={`relative flex aspect-square w-full select-none items-center justify-center ${
-        small ? "max-w-[260px]" : "max-w-[420px]"
-      } ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
-      style={{ perspective: 1100, touchAction: "none" }}
-      aria-label="Interactive 3D technology sphere"
-    >
-      {/* local glow — NOT the hero background */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.14),transparent_65%)]"
-      />
+  /* container max width = 2*radius + iconSize + padding */
+  const maxWidth = RADIUS * 2 + iconSize + 40;
 
-      <motion.div
-        className="relative h-full w-full"
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div
+        ref={sceneRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        className={`relative flex aspect-square w-full select-none items-center justify-center ${
+          dragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
         style={{
-          transformStyle: "preserve-3d",
-          rotateX: reduced ? 0 : tiltX,
-          rotateY: reduced ? 0 : tiltY,
+          maxWidth: `${maxWidth}px`,
+          touchAction: "none",
         }}
+        aria-label="Interactive 3D technology sphere. Drag to rotate."
       >
+        {/* local glow (NOT page background) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.14),transparent_65%)]"
+        />
+
+        {/* static orbital guide rings */}
         <OrbitalRing
-          radius={RADIUS + 45}
-          tilt={72}
-          speed={0.6}
-          reduced={reduced}
+          radius={RADIUS + 55}
+          scaleY={0.32}
+          rotate={22}
+          opacity={0.4}
         />
         <OrbitalRing
-          radius={RADIUS + 20}
-          tilt={-58}
-          speed={0.9}
-          reduced={reduced}
+          radius={RADIUS + 90}
+          scaleY={0.22}
+          rotate={-18}
+          opacity={0.28}
         />
 
         <EnergyCore reduced={reduced} active={hovered !== null} />
@@ -354,18 +460,26 @@ function TechReactor() {
             index={i}
             total={technologies.length}
             radius={RADIUS}
-            iconSize={ICON_SIZE}
-            rotation={rotation}
+            iconSize={iconSize}
+            rotX={rotX}
+            rotY={rotY}
+            parallaxX={parallaxX}
+            parallaxY={parallaxY}
             hovered={hovered === tech.name}
             onHover={setHovered}
           />
         ))}
-      </motion.div>
+      </div>
+
+      {/* drag hint */}
+      <p className="text-center text-[11px] tracking-wide text-slate-500">
+        {technologies.length} technologies
+      </p>
     </div>
   );
 }
 
-/* ---------------- hero ---------------- */
+/* ---------------- Hero ---------------- */
 
 export default function Hero() {
   return (
@@ -374,7 +488,7 @@ export default function Hero() {
         id="home"
         className="relative flex min-h-[calc(100svh-4rem)] snap-start flex-col justify-center scroll-mt-20 py-10 sm:min-h-[calc(100svh-5rem)] sm:py-14 lg:py-16"
       >
-        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-20">
+        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:gap-12">
           {/* text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
