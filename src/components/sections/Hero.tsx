@@ -222,13 +222,13 @@ function EnergyCore({
       {!reduced && (
         <>
           <motion.div
-            className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-500/50"
-            animate={{ scale: [1, 3.2], opacity: [0.7, 0] }}
+            className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-500/50 sm:h-14 sm:w-14"
+            animate={{ scale: [1, 2.8], opacity: [0.7, 0] }}
             transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
           />
           <motion.div
-            className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/40"
-            animate={{ scale: [1, 3.2], opacity: [0.7, 0] }}
+            className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/40 sm:h-14 sm:w-14"
+            animate={{ scale: [1, 2.8], opacity: [0.7, 0] }}
             transition={{
               duration: 2.6,
               repeat: Infinity,
@@ -256,13 +256,13 @@ function EnergyCore({
         }}
       />
 
-      <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 shadow-lg shadow-blue-500/40">
+      <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 shadow-lg shadow-blue-500/40 sm:h-14 sm:w-14">
         <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-white/40 via-transparent to-transparent" />
         <span
-          className="relative text-base font-bold text-white"
+          className="relative text-xs font-bold text-white sm:text-base"
           style={{ textShadow: "0 1px 0 rgba(0,0,0,0.4)" }}
         >
-          {"</>"}
+          AL
         </span>
       </div>
     </div>
@@ -304,26 +304,24 @@ function TechReactor() {
   const reduced = useReducedMotion() ?? false;
   const size = useSize();
 
-  const RADIUS = size === "sm" ? 120 : size === "md" ? 180 : 240;
-  const baseIcon = size === "sm" ? 34 : size === "md" ? 42 : 48;
+  // ↓ tighter radius, especially on mobile
+  const RADIUS = size === "sm" ? 80 : size === "md" ? 150 : 210;
+  const baseIcon = size === "sm" ? 26 : size === "md" ? 36 : 44;
 
-  /* Icon size auto-shrinks as more skills are added */
   const iconSize = Math.max(
-    22,
+    20,
     Math.min(baseIcon, Math.floor(RADIUS / Math.sqrt(technologies.length))),
   );
 
   const [hovered, setHovered] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
-  /* rotation state */
   const rotX = useMotionValue(0);
   const rotY = useMotionValue(0);
   const velX = useRef(0);
   const velY = useRef(0);
   const lastPointer = useRef({ x: 0, y: 0 });
 
-  /* parallax tilt from mouse */
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const parallaxX = useSpring(useTransform(my, [-0.5, 0.5], [-4, 4]), {
@@ -337,7 +335,6 @@ function TechReactor() {
 
   const sceneRef = useRef<HTMLDivElement>(null);
 
-  /* ---- auto-rotate + momentum decay ---- */
   useEffect(() => {
     if (reduced) return;
     let raf = 0;
@@ -359,25 +356,20 @@ function TechReactor() {
     return () => cancelAnimationFrame(raf);
   }, [dragging, reduced, rotX, rotY]);
 
-  /* ---- drag in both axes with momentum ---- */
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: PointerEvent) => {
       const dx = e.clientX - lastPointer.current.x;
       const dy = e.clientY - lastPointer.current.y;
       lastPointer.current = { x: e.clientX, y: e.clientY };
-
-      const dY = dx * 0.5;
+      const dY = -dx * 0.5;
       const dX = dy * 0.5;
-
       rotY.set(rotY.get() + dY);
       rotX.set(rotX.get() + dX);
-
       velY.current = dY * 0.5;
       velX.current = dX * 0.5;
     };
     const end = () => setDragging(false);
-
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", end);
     window.addEventListener("pointercancel", end);
@@ -394,7 +386,6 @@ function TechReactor() {
     lastPointer.current = { x: e.clientX, y: e.clientY };
     velX.current = 0;
     velY.current = 0;
-    /* freeze parallax so drag doesn't double-count */
     mx.set(0);
     my.set(0);
   };
@@ -412,44 +403,50 @@ function TechReactor() {
     my.set(0);
   };
 
-  /* container max width = 2*radius + iconSize + padding */
-  const maxWidth = RADIUS * 2 + iconSize + 40;
+  // ↓ tighter box on mobile; icons must fit inside RADIUS*2 + iconSize
+  const maxWidth = RADIUS * 2 + iconSize + (size === "sm" ? 8 : 24);
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex w-full flex-col items-center gap-3">
       <div
         ref={sceneRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
-        className={`relative flex aspect-square w-full select-none items-center justify-center ${
+        className={`relative w-full select-none ${
           dragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         style={{
-          maxWidth: `${maxWidth}px`,
+          // ↓ shorter than square on mobile so it fits between text and buttons
+          aspectRatio: size === "sm" ? "1 / 1.05" : "1 / 1",
+          maxWidth: `${RADIUS * 2 + iconSize + (size === "sm" ? 8 : 24)}px`,
+          margin: "0 auto",
           touchAction: "none",
         }}
         aria-label="Interactive 3D technology sphere. Drag to rotate."
       >
-        {/* local glow (NOT page background) */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.14),transparent_65%)]"
+          className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.12),transparent_65%)]"
         />
 
-        {/* static orbital guide rings */}
-        <OrbitalRing
-          radius={RADIUS + 55}
-          scaleY={0.32}
-          rotate={22}
-          opacity={0.4}
-        />
-        <OrbitalRing
-          radius={RADIUS + 90}
-          scaleY={0.22}
-          rotate={-18}
-          opacity={0.28}
-        />
+        {/* scale rings to fit the smaller box on mobile */}
+        {size !== "sm" && (
+          <>
+            <OrbitalRing
+              radius={RADIUS + 40}
+              scaleY={0.32}
+              rotate={22}
+              opacity={0.35}
+            />
+            <OrbitalRing
+              radius={RADIUS + 68}
+              scaleY={0.22}
+              rotate={-18}
+              opacity={0.25}
+            />
+          </>
+        )}
 
         <EnergyCore reduced={reduced} active={hovered !== null} />
 
@@ -471,9 +468,8 @@ function TechReactor() {
         ))}
       </div>
 
-      {/* drag hint */}
       <p className="text-center text-[11px] tracking-wide text-slate-500">
-        {technologies.length} technologies
+        The Tech Sphere · {technologies.length} technologies
       </p>
     </div>
   );
@@ -486,88 +482,85 @@ export default function Hero() {
     <Reveal>
       <section
         id="home"
-        className="relative flex min-h-[calc(100svh-4rem)] snap-start flex-col justify-center scroll-mt-20 py-10 sm:min-h-[calc(100svh-5rem)] sm:py-14 lg:py-16"
+        className="relative isolate z-0 flex min-h-[calc(100svh-4rem)] snap-start flex-col justify-center scroll-mt-20 pt-4 pb-10 sm:min-h-[calc(100svh-5rem)] sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16"
       >
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] md:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:gap-12">
-          {/* text */}
+          {/* -------- Editorial left panel -------- */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="order-1 space-y-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="order-1 relative w-full max-w-xl"
           >
-            <span className="inline-block rounded-full border border-slate-700 px-4 py-1 text-sm text-slate-300">
-              Hi, I'm
+            {/* Dot-grid texture, fades out from top-left */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-[0.05]"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                backgroundSize: "22px 22px",
+                maskImage:
+                  "radial-gradient(ellipse at top left, black 35%, transparent 72%)",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse at top left, black 35%, transparent 72%)",
+              }}
+            />
+
+            {/* Vertical side label — desktop only */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -left-40 top-1/2 hidden -translate-y-1/2 -rotate-90 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.4em] text-slate-600 lg:block"
+            >
+              Portfolio · 2026
             </span>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-            >
-              Atharva
-              <span className="text-blue-400"> Lohar</span>
-            </motion.h1>
+            {/* ── Top status bar ── */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                Probably Overthinking Things...
+              </span>
+            </div>
 
-            <div className="space-y-4">
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                className="text-xl font-semibold text-blue-400 sm:text-2xl"
-              >
-                Full Stack Developer
-              </motion.h2>
+            {/* ── Name — mixed weight, italic second line ── */}
+            <TypingName />
 
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                className="text-lg font-medium text-slate-300 sm:text-xl"
-              >
-                AI &amp; Computer Vision Engineer
-              </motion.h3>
+            {/* ── Roles — mono, single line with divider ── */}
+            <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.22em] text-blue-400">
+              Software Developer | Technology Explorer
+            </p>
 
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="max-w-2xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8"
-              >
-                I build scalable web applications, AI-powered software, and
-                backend systems with a strong focus on performance, clean
-                architecture, and user experience.
-              </motion.p>
+            {/* ── Intro ── */}
+            <p className="mt-6 max-w-md text-sm leading-7 text-slate-400 sm:text-[15px]">
+              I enjoy exploring technology, solving problems, and building
+              things that make a difference. Whether it's software, intelligent
+              systems, or something entirely new, I'm usually curious enough to
+              figure it out.
+            </p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65 }}
-                className="flex flex-col gap-4 sm:flex-row"
+            {/* ── CTAs ── */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                onClick={() =>
+                  document
+                    .getElementById("projects")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
               >
-                <Button
-                  size="lg"
-                  onClick={() =>
-                    document
-                      .getElementById("projects")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                >
-                  View Projects
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={() =>
-                    document
-                      .getElementById("contact")
-                      ?.scrollIntoView({ behavior: "smooth" })
-                  }
-                >
-                  Contact Me
-                </Button>
-              </motion.div>
+                View Projects
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() =>
+                  document
+                    .getElementById("contact")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                Contact Me
+              </Button>
             </div>
           </motion.div>
 
@@ -576,7 +569,7 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.4, ease: "easeOut" }}
-            className="order-2 flex items-center justify-center"
+            className="order-2 flex w-full min-w-0 items-center justify-center px-4 py-6 sm:py-0"
           >
             <TechReactor />
           </motion.div>
@@ -602,5 +595,83 @@ export default function Hero() {
         </motion.div>
       </section>
     </Reveal>
+  );
+}
+
+const LINE_1 = "Atharva";
+const LINE_2 = "Lohar";
+const TOTAL = LINE_1.length + LINE_2.length;
+
+function Cursor() {
+  return (
+    <span
+      aria-hidden
+      className="ml-0.5 inline-block h-[1.1em] w-[3px] translate-y-[0.05em] rounded-sm bg-blue-400 align-middle shadow-[0_0_6px_rgba(59,130,246,0.55)] animate-blink"
+    />
+  );
+}
+
+function TypingName() {
+  const reduced = useReducedMotion() ?? false;
+  const [count, setCount] = useState(reduced ? TOTAL : 0);
+  const [done, setDone] = useState(reduced);
+
+  useEffect(() => {
+    if (reduced) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    let i = 0;
+
+    const tick = () => {
+      if (cancelled) return;
+      i += 1;
+      setCount(i);
+      if (i < TOTAL) {
+        // 80–130ms per char → feels human, not robotic
+        timer = setTimeout(tick, 80 + Math.random() * 50);
+      } else {
+        // Small pause before the period lands, so it reads as punctuation
+        timer = setTimeout(() => setDone(true), 180);
+      }
+    };
+
+    // Let the panel finish fading in first
+    const start = setTimeout(tick, 550);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(start);
+      clearTimeout(timer);
+    };
+  }, [reduced]);
+
+  const l1 = LINE_1.slice(0, Math.min(count, LINE_1.length));
+  const l2 =
+    count > LINE_1.length
+      ? LINE_2.slice(0, Math.min(count - LINE_1.length, LINE_2.length))
+      : "";
+
+  // Cursor travels: end of line 1 → end of line 2 → after the period
+  const cursorOnLine1 = !done && count <= LINE_1.length;
+  const cursorOnLine2 = !done && count > LINE_1.length;
+
+  return (
+    <h1 className="mt-7 text-4xl font-bold leading-[0.92] tracking-[-0.02em] text-slate-100 sm:text-5xl md:text-6xl lg:text-7xl">
+      <span>
+        {l1}
+        {cursorOnLine1 && <Cursor />}
+      </span>
+      <br />
+      <span className="font-light italic tracking-tight text-slate-300">
+        {l2}
+        {cursorOnLine2 && <Cursor />}
+        {done && (
+          <>
+            <span className="text-blue-400">.</span>
+            <Cursor />
+          </>
+        )}
+      </span>
+    </h1>
   );
 }

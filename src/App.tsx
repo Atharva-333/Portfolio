@@ -22,7 +22,7 @@ export default function App() {
         <div className="mx-auto max-w-7xl text-center">
           <h2 className="text-xl font-semibold">Atharva Lohar</h2>
           <p className="mt-3 text-[var(--text-secondary)]">
-            Full Stack Developer • AI Engineer
+            Software Developer • Technology Explorer
           </p>
           <div className="mt-6 flex justify-center gap-6">
             <Button variant="ghost" href="https://github.com/...">
