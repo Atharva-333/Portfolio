@@ -733,7 +733,7 @@ export default function Navbar() {
             </motion.div>
 
             <nav
-              className="hidden items-center gap-0.5 md:flex lg:gap-1"
+              className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 md:flex lg:gap-1"
               aria-label="Primary"
             >
               {navigationLinks.map((link) => (
