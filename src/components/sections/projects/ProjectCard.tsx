@@ -76,9 +76,9 @@ export default function ProjectCard({
           className="pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-b border-r border-slate-600/70"
         />
 
-        <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-8">
+        <div className="relative grid min-w-0 gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-8">
           {/* LEFT COLUMN */}
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-blue-400">
                 Project
@@ -90,7 +90,7 @@ export default function ProjectCard({
             </div>
 
             <div className="mt-4 flex flex-wrap items-start gap-x-3 gap-y-2">
-              <h3 className="text-2xl font-semibold leading-tight text-slate-100 sm:text-3xl">
+              <h3 className="min-w-0 break-words text-lg font-semibold leading-tight text-slate-100 sm:text-2xl">
                 {project.title}
               </h3>
               {project.featured && (
@@ -145,7 +145,7 @@ export default function ProjectCard({
 
             {/* DESKTOP ONLY: Full deep-dive details */}
             <div className="hidden lg:block">
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+              <h4 className="font-mono text-[9px] uppercase tracking-[0.28em] text-slate-500">
                 Key Features
               </h4>
               <ul className="mt-2.5 space-y-1.5">
@@ -162,7 +162,7 @@ export default function ProjectCard({
 
               <div className="my-4 h-px bg-slate-800" />
 
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+              <h4 className="font-mono text-[9px] uppercase tracking-[0.28em] text-slate-500">
                 Architecture
               </h4>
               <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
@@ -181,7 +181,7 @@ export default function ProjectCard({
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4">
             <button
               type="button"
               onClick={(e) => {
@@ -205,7 +205,7 @@ export default function ProjectCard({
 
             {/* DESKTOP ONLY: Stack tags */}
             <div className="hidden lg:block">
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+              <h4 className="font-mono text-[9px] uppercase tracking-[0.28em] text-slate-500">
                 Stack
               </h4>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -269,7 +269,7 @@ export default function ProjectCard({
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-800 p-5">
-                <h3 className="pr-4 text-xl font-semibold text-slate-100">
+                <h3 className="min-w-0 break-words pr-4 text-lg font-semibold text-slate-100">
                   {project.title}
                 </h3>
                 <button
@@ -289,9 +289,9 @@ export default function ProjectCard({
                   className="mb-6 w-full rounded-xl border border-slate-700/50 object-cover"
                 />
 
-                <h4 className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                <h5 className="mt-5 font-mono text-[9px] uppercase tracking-[0.03em] text-slate-500">
                   Key Features
-                </h4>
+                </h5>
                 <ul className="mb-6 space-y-2">
                   {project.features.map((item) => (
                     <li
@@ -304,9 +304,9 @@ export default function ProjectCard({
                   ))}
                 </ul>
 
-                <h4 className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                <h5 className="mt-5 font-mono text-[9px] uppercase tracking-[0.03em] text-slate-500">
                   Architecture
-                </h4>
+                </h5>
                 <div className="mb-6 flex flex-wrap items-center gap-1.5">
                   {project.architecture.map((step, i) => (
                     <Fragment key={step}>
@@ -320,7 +320,7 @@ export default function ProjectCard({
                   ))}
                 </div>
 
-                <h4 className="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                <h4 className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-slate-500">
                   Stack
                 </h4>
                 <div className="flex flex-wrap gap-1.5">

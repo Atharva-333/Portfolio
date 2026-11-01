@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Unbounded:700|Figtree:400");
 @import "tailwindcss";
 
 :root {
@@ -14,6 +15,7 @@
 }
 
 html {
+  font-size: 100%;
   min-height: 100%;
   scroll-behavior: smooth;
   background: var(--background);
@@ -25,9 +27,43 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--text-primary);
-  font-family: "Inter", sans-serif;
+  font-family: "Figtree";
+  font-weight: 400;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Unbounded";
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 4.210rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 6vw, 3.158rem);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 4vw, 2.369rem);
+}
+
+h4 {
+  font-size: clamp(1.25rem, 3vw, 1.777rem);
+}
+
+h5 {
+  font-size: clamp(1.125rem, 2.5vw, 1.333rem);
+}
+
+small {
+  font-size: 0.750rem;
 }
 
 *,

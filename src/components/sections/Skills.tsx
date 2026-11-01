@@ -401,14 +401,14 @@ export default function Skills() {
               )}
             </div>
 
-            <h3
+            <h5
               className={cn(
                 "mb-6 font-mono text-sm uppercase tracking-[0.2em] transition-colors duration-500",
                 romanticMode ? "text-pink-200" : "text-slate-500",
               )}
             >
-              {romanticMode ? "♥ Emotional Visualizer ♥" : "Data Visualizer"}
-            </h3>
+              {romanticMode ? <>♥ Emotional <br/> Visualizer ♥</> : <>Data <br/> Visualizer</>}
+            </h5>
 
             <div className="flex-1 flex flex-col justify-center relative">
               <AnimatePresence mode="wait">

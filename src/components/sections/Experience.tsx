@@ -123,9 +123,9 @@ function ExperienceCard({
       <div>
         <p className="text-sm leading-7 text-slate-400">{data.description}</p>
 
-        <h4 className="mt-5 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+        <h5 className="mt-5 font-mono text-[10px] uppercase tracking-[0.03em] text-slate-500">
           Key Responsibilities
-        </h4>
+        </h5>
         <ul className="mt-3 space-y-2">
           {data.responsibilities.map((item: string) => (
             <li

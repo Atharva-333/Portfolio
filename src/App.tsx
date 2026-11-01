@@ -16,7 +16,7 @@ export default function App() {
       <Contact />
       <footer className="border-t border-[var(--border)] py-12">
         <div className="mx-auto max-w-7xl text-center">
-          <h2 className="text-xl font-semibold">Atharva Lohar</h2>
+          <h2 className="text-lg font-semibold">Atharva Lohar</h2>
           <p className="mt-3 text-[var(--text-secondary)]">
             That's the portfolio. The experiments, however, are far from over.
             Feel free to reach out, explore my projects, or just say hello.
