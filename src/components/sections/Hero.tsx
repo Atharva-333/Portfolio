@@ -262,7 +262,7 @@ function EnergyCore({
           className="relative text-xs font-bold text-white sm:text-base"
           style={{ textShadow: "0 1px 0 rgba(0,0,0,0.4)" }}
         >
-          AL
+          {"</>"}
         </span>
       </div>
     </div>

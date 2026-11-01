@@ -22,14 +22,14 @@ export default function Projects() {
               hidden: {},
               visible: {
                 transition: {
-                  delayChildren: 0.1,
-                  staggerChildren: 0.2,
+                  delayChildren: 0, // was 0.1
+                  staggerChildren: 0.05, // was 0.2
                 },
               },
             }}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }} // was default 0.2
             className="mt-12 grid gap-12"
           >
             {projects.length === 0 ? (

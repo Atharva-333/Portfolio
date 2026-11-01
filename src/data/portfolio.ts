@@ -30,28 +30,96 @@ export type Experience = {
   technologies: string[];
 };
 
-export const experience: Experience = {
-  role: "Software Development Intern",
-  company: "Talent Corner HR Services Pvt. Ltd.",
-  duration: "June 2026 - August 2026",
-  description:
-    "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
-  responsibilities: [
-    "Built production LMS features",
-    "Integrated backend APIs",
-    "Developed dashboard modules",
-    "Refined UI and UX",
-    "Collaborated using Git & GitHub",
-  ],
-  technologies: [
-    "React",
-    "JavaScript",
-    "FastAPI",
-    "PostgreSQL",
-    "Supabase",
-    "Python",
-  ],
-};
+export const experience: Experience[] = [
+  {
+    role: "Software Development Intern",
+    company: "Talent Corner HR Services Pvt. Ltd.",
+    duration: "June 2026 - August 2026",
+    description:
+      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
+    responsibilities: [
+      "Built production LMS features",
+      "Integrated backend APIs",
+      "Developed dashboard modules",
+      "Refined UI and UX",
+      "Collaborated using Git & GitHub",
+    ],
+    technologies: [
+      "React",
+      "JavaScript",
+      "FastAPI",
+      "PostgreSQL",
+      "Supabase",
+      "Python",
+    ],
+  },
+  {
+    role: "Software Development Intern",
+    company: "Talent Corner HR Services Pvt. Ltd.",
+    duration: "June 2026 - August 2026",
+    description:
+      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
+    responsibilities: [
+      "Built production LMS features",
+      "Integrated backend APIs",
+      "Developed dashboard modules",
+      "Refined UI and UX",
+      "Collaborated using Git & GitHub",
+    ],
+    technologies: [
+      "React",
+      "JavaScript",
+      "FastAPI",
+      "PostgreSQL",
+      "Supabase",
+      "Python",
+    ],
+  },
+  {
+    role: "Software Development Intern",
+    company: "Talent Corner HR Services Pvt. Ltd.",
+    duration: "June 2026 - August 2026",
+    description:
+      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
+    responsibilities: [
+      "Built production LMS features",
+      "Integrated backend APIs",
+      "Developed dashboard modules",
+      "Refined UI and UX",
+      "Collaborated using Git & GitHub",
+    ],
+    technologies: [
+      "React",
+      "JavaScript",
+      "FastAPI",
+      "PostgreSQL",
+      "Supabase",
+      "Python",
+    ],
+  },
+  {
+    role: "Software Development Intern",
+    company: "Talent Corner HR Services Pvt. Ltd.",
+    duration: "June 2026 - August 2026",
+    description:
+      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
+    responsibilities: [
+      "Built production LMS features",
+      "Integrated backend APIs",
+      "Developed dashboard modules",
+      "Refined UI and UX",
+      "Collaborated using Git & GitHub",
+    ],
+    technologies: [
+      "React",
+      "JavaScript",
+      "FastAPI",
+      "PostgreSQL",
+      "Supabase",
+      "Python",
+    ],
+  }
+];
 
 export const projects = [
   {

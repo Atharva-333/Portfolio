@@ -179,9 +179,9 @@ function BarrelCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const offset = useTransform(rotation, (r) => wrapOffset(index - r, total));
-  const x = useTransform(offset, (o) => `${o * 72}%`);
-  const rotateY = useTransform(offset, (o) => -o * 26);
-  const z = useTransform(offset, (o) => -Math.abs(o) * 160);
+  const x = useTransform(offset, (o) => `${o * 60}%`);
+  const rotateY = useTransform(offset, (o) => -o * 22);
+  const z = useTransform(offset, (o) => -Math.abs(o) * 140);
   const scale = useTransform(offset, (o) =>
     Math.max(0.55, 1 - Math.abs(o) * 0.12),
   );
@@ -342,24 +342,24 @@ export default function Experience() {
       >
         {/* index */}
         <div className="mb-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
-          <span className="h-px w-8 bg-slate-700" />
-          02 · Experience
+          <span className="h-px w-8 bg-slate-700" />A few commits, questionable
+          decisions, and lessons learned.
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-4xl font-bold tracking-tight">
-              Where I've Shipped
+              The Experience Log.
             </h2>
             <div className="mt-4 flex justify-start">
               <div className="h-1 w-16 rounded-full bg-blue-500" />
             </div>
-            <p className="mt-4 max-w-xl text-slate-400">
-              {isBarrel
-                ? "Drag, scroll, or use arrows to rotate through roles."
-                : total > 1
-                  ? "Scroll through roles below."
-                  : "Production experience from a live internship."}
+            <p className="mt-4 text-slate-400">
+              Every experience has been another opportunity to learn,
+              experiment, and figure things out beyond the classroom. From
+              collaborating on projects to tackling real-world problems, I'm
+              gradually turning curiosity into practical skills. Still a work in
+              progress — much like most of my code.
             </p>
           </div>
 
