@@ -272,7 +272,7 @@ export const developmentProcess = [
 ];
 
 export const contact = {
-  email: "atharva@example.com",
+  email: "atharvalohar333@gmail.com",
 
   github: {
     username: "Atharva-333",

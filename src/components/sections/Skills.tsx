@@ -28,7 +28,6 @@ export default function Skills() {
   const [isBooting, setIsBooting] = useState(true);
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
-  // --- NEW EASTER EGG STATE ---
   const [romanticMode, setRomanticMode] = useState(false);
   const loveModeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -40,61 +39,67 @@ export default function Skills() {
 
   const hasBooted = useRef(false);
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (loveModeTimer.current) clearTimeout(loveModeTimer.current);
     };
   }, []);
 
-  // 1. Wait until the user scrolls to the section
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+    let bootTimeout: ReturnType<typeof setTimeout>;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !hasBooted.current) {
-          hasBooted.current = true;
+          clearTimeout(scrollTimeout);
+          clearTimeout(bootTimeout);
 
-          let currentLine = 0;
-          const boot = () => {
-            if (currentLine < BOOT_SEQUENCE.length) {
-              setHistory((prev) => [
-                ...prev,
-                { type: "system", text: BOOT_SEQUENCE[currentLine] },
-              ]);
-              currentLine++;
-              setTimeout(boot, 400 + Math.random() * 400);
-            } else {
-              setIsBooting(false);
-            }
-          };
-          boot();
+          scrollTimeout = setTimeout(() => {
+            hasBooted.current = true;
+
+            let currentLine = 0;
+            const boot = () => {
+              if (currentLine < BOOT_SEQUENCE.length) {
+                setHistory((prev) => [
+                  ...prev,
+                  { type: "system", text: BOOT_SEQUENCE[currentLine] },
+                ]);
+                currentLine++;
+                bootTimeout = setTimeout(boot, 400 + Math.random() * 400);
+              } else {
+                setIsBooting(false);
+              }
+            };
+            boot();
+          }, 1900);
+        } else if (!entries[0].isIntersecting && !hasBooted.current) {
+          clearTimeout(scrollTimeout);
         }
       },
       { threshold: 0.2 },
     );
 
     observer.observe(section);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(scrollTimeout);
+      clearTimeout(bootTimeout);
+    };
   }, []);
 
-  // 2. Auto-scroll to bottom
   useEffect(() => {
     if (hasBooted.current && history.length > 0) {
       endRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
   }, [history]);
 
-  // --- NEW EASTER EGG LOGIC ---
   const activateLoveMode = () => {
     setRomanticMode(true);
-
-    if (loveModeTimer.current) {
-      clearTimeout(loveModeTimer.current);
-    }
-
+    if (loveModeTimer.current) clearTimeout(loveModeTimer.current);
     loveModeTimer.current = setTimeout(() => {
       setRomanticMode(false);
       loveModeTimer.current = null;
@@ -122,11 +127,9 @@ export default function Skills() {
       return;
     }
 
-    // --- EASTER EGGS ---
     if (cmd === "love") {
       activateLoveMode();
       setActivePanel(null);
-
       newHistory.push({
         type: "output",
         text:
@@ -145,7 +148,6 @@ export default function Skills() {
     } else if (cmd === "sayali") {
       activateLoveMode();
       setActivePanel(null);
-
       newHistory.push({
         type: "output",
         text:
@@ -187,8 +189,6 @@ export default function Skills() {
           "System recommendation: Restart your life.\n" +
           "Warning: This operation cannot be undone.",
       });
-
-      // --- STANDARD COMMANDS ---
     } else if (cmd === "help") {
       newHistory.push({
         type: "output",
@@ -281,7 +281,6 @@ export default function Skills() {
       />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
-        {/* ================= NEW UNIFIED HEADER ================= */}
         <div className="mb-12">
           <div className="mb-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
             <span className="h-px w-8 bg-slate-700" />
@@ -301,10 +300,8 @@ export default function Skills() {
             production server.
           </p>
         </div>
-        {/* ====================================================== */}
 
         <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-          {/* ================= LEFT SIDE: TERMINAL ================= */}
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col overflow-hidden rounded-xl border border-slate-700/80 bg-[#0a0f1c] shadow-2xl shadow-blue-500/5">
             <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/50 px-4 py-3 sm:px-6">
               <div className="flex items-center gap-2">
@@ -312,10 +309,13 @@ export default function Skills() {
                 <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
                 <div className="h-3 w-3 rounded-full bg-green-500/80" />
               </div>
-              <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
+
+              {/* HIDDEN ON SMALL SCREENS */}
+              <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-slate-400">
                 <Terminal className="h-3.5 w-3.5" />
                 <span>root@atharva:~/portfolio</span>
               </div>
+
               <div className="w-12" />
             </div>
 
@@ -372,7 +372,6 @@ export default function Skills() {
             </div>
           </div>
 
-          {/* ================= RIGHT SIDE: HUD / VISUALIZER ================= */}
           <div
             className={cn(
               "lg:col-span-5 xl:col-span-4 hidden lg:flex flex-col rounded-xl border p-6 backdrop-blur-sm relative overflow-hidden transition-all duration-700",
@@ -423,10 +422,8 @@ export default function Skills() {
                     className="relative flex min-h-[330px] items-center justify-center overflow-hidden rounded-xl"
                     style={{ perspective: "1000px" }}
                   >
-                    {/* Pink atmospheric background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-rose-400/5 to-purple-500/20" />
 
-                    {/* Floating 3D hearts */}
                     {Array.from({ length: 14 }).map((_, i) => (
                       <motion.div
                         key={i}
@@ -464,7 +461,6 @@ export default function Skills() {
                       </motion.div>
                     ))}
 
-                    {/* Central glowing heart */}
                     <motion.div
                       animate={{
                         scale: [1, 1.12, 1],
@@ -505,7 +501,6 @@ export default function Skills() {
                       </p>
                     </motion.div>
 
-                    {/* Romantic decorative rings */}
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{
@@ -633,7 +628,6 @@ export default function Skills() {
           </div>
         </div>
 
-        {/* Mobile Quick Commands */}
         <div className="mt-6 flex flex-wrap gap-2 lg:hidden">
           <span className="text-xs font-mono text-slate-500 flex items-center mr-2">
             Quick Query:
