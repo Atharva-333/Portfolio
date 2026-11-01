@@ -194,6 +194,9 @@ export default function Projects() {
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Things I've Built.
           </h2>
+          <div className="mt-4 flex justify-start">
+            <div className="h-1 w-16 rounded-full bg-blue-500" />
+          </div>
           <p className="mt-2 text-sm leading-6 text-slate-400">
             A collection of ideas turned into projects, experiments, and
             applications. Some solve problems, others satisfy curiosity — all

@@ -2,9 +2,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import Hero from "@/components/sections/Hero";
 import Experience from "@/components/sections/Experience";
 import Projects from "@/components/sections/Projects";
-import WhyWorkWithMe from "@/components/sections/WhyWorkWithMe";
 import Skills from "@/components/sections/Skills";
-import DevelopmentProcess from "@/components/sections/DevelopmentProcess";
 import Contact from "@/components/sections/Contact";
 import Button from "@/components/ui/Button";
 
@@ -14,9 +12,7 @@ export default function App() {
       <Hero />
       <Experience />
       <Projects />
-      <WhyWorkWithMe />
       <Skills />
-      <DevelopmentProcess />
       <Contact />
       <footer className="border-t border-[var(--border)] py-12">
         <div className="mx-auto max-w-7xl text-center">
