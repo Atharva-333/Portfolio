@@ -16,7 +16,7 @@ function useMinWidth(px: number) {
   return ok;
 }
 
-const FLICK_GAIN = 14;
+const FLICK_GAIN = 3.3;
 
 export default function Projects() {
   const total = projects.length;
@@ -123,7 +123,8 @@ export default function Projects() {
     scroller.scrollLeft = dragStartScroll.current - dx * FLICK_GAIN;
   };
 
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+  // Removed `e` parameter here to fix the unused variable warning
+  const endDrag = () => {
     if (!dragging) return;
     setDragging(false);
 
@@ -188,13 +189,15 @@ export default function Projects() {
         <div>
           <div className="mb-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
             <span className="h-px w-8 bg-slate-700" />
-            Selected Work
+            Some ideas escaped the brainstorming phase.
           </div>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Featured Projects.
+            Things I've Built.
           </h2>
-          <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
-            Full-stack development, AI integration, and scalable system design.
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            A collection of ideas turned into projects, experiments, and
+            applications. Some solve problems, others satisfy curiosity — all
+            come with a few lessons and occasional bugs.
           </p>
         </div>
       </div>
@@ -205,8 +208,8 @@ export default function Projects() {
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        onPointerLeave={(e) => {
-          if (dragging) endDrag(e);
+        onPointerLeave={() => {
+          if (dragging) endDrag();
         }}
         className={cn(
           "relative left-1/2 mt-10 flex w-[100vw] -translate-x-1/2 gap-8 overflow-x-auto overscroll-x-contain",
