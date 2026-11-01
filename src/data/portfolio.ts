@@ -5,6 +5,10 @@ import {
   SiSupabase,
   SiPostgresql,
   SiOpencv,
+  SiPython,
+  SiJavascript,
+  SiC,
+  SiCplusplus
 } from "react-icons/si";
 import attendence from "../components/sections/projects/attendence.png";
 import lms from "../components/sections/projects/lms.png";
@@ -15,9 +19,11 @@ export const technologies = [
   { name: "FastAPI", icon: SiFastapi },
   { name: "Supabase", icon: SiSupabase },
   { name: "PostgreSQL", icon: SiPostgresql },
-  { name: "YOLOv8", icon: SiOpencv },
-  { name: "DeepFace", icon: SiOpencv },
   { name: "OpenCV", icon: SiOpencv },
+  { name: "Python", icon: SiPython },
+  { name: "JavaScript", icon: SiJavascript },
+  { name: "C", icon: SiC },
+  { name: "C++", icon: SiCplusplus },
 ];
 
 // portfolio.ts
@@ -53,72 +59,6 @@ export const experience: Experience[] = [
       "Python",
     ],
   },
-  {
-    role: "Software Development Intern",
-    company: "Talent Corner HR Services Pvt. Ltd.",
-    duration: "June 2026 - August 2026",
-    description:
-      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
-    responsibilities: [
-      "Built production LMS features",
-      "Integrated backend APIs",
-      "Developed dashboard modules",
-      "Refined UI and UX",
-      "Collaborated using Git & GitHub",
-    ],
-    technologies: [
-      "React",
-      "JavaScript",
-      "FastAPI",
-      "PostgreSQL",
-      "Supabase",
-      "Python",
-    ],
-  },
-  {
-    role: "Software Development Intern",
-    company: "Talent Corner HR Services Pvt. Ltd.",
-    duration: "June 2026 - August 2026",
-    description:
-      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
-    responsibilities: [
-      "Built production LMS features",
-      "Integrated backend APIs",
-      "Developed dashboard modules",
-      "Refined UI and UX",
-      "Collaborated using Git & GitHub",
-    ],
-    technologies: [
-      "React",
-      "JavaScript",
-      "FastAPI",
-      "PostgreSQL",
-      "Supabase",
-      "Python",
-    ],
-  },
-  {
-    role: "Software Development Intern",
-    company: "Talent Corner HR Services Pvt. Ltd.",
-    duration: "June 2026 - August 2026",
-    description:
-      "Contributed to the development of a production Learning Management System by integrating backend APIs, refining dashboards, and collaborating on scalable frontend and backend features.",
-    responsibilities: [
-      "Built production LMS features",
-      "Integrated backend APIs",
-      "Developed dashboard modules",
-      "Refined UI and UX",
-      "Collaborated using Git & GitHub",
-    ],
-    technologies: [
-      "React",
-      "JavaScript",
-      "FastAPI",
-      "PostgreSQL",
-      "Supabase",
-      "Python",
-    ],
-  }
 ];
 
 export const projects = [
@@ -204,27 +144,6 @@ export const projects = [
   },
 ];
 
-export const strengths = [
-  {
-    title: "Production Experience",
-    description:
-      "Built and improved production-ready applications through internship experience, focusing on maintainable and scalable solutions.",
-    icon: "briefcase",
-  },
-  {
-    title: "Modern Tech Stack",
-    description:
-      "Comfortable building full-stack applications with React, FastAPI, PostgreSQL, Supabase and modern development practices.",
-    icon: "layers",
-  },
-  {
-    title: "Problem Solver",
-    description:
-      "I enjoy breaking complex problems into smaller parts and delivering practical, user-focused solutions.",
-    icon: "brain",
-  },
-];
-
 export const skillCategories = [
   {
     title: "Frontend",
@@ -241,33 +160,6 @@ export const skillCategories = [
   {
     title: "Tools",
     skills: ["Git", "GitHub", "Docker", "VS Code", "Linux", "Postman"],
-  },
-];
-
-export const developmentProcess = [
-  {
-    step: "01",
-    title: "Understand Requirements",
-    description:
-      "Learn the business goals, users, and technical requirements before writing code.",
-  },
-  {
-    step: "02",
-    title: "Plan the Architecture",
-    description:
-      "Design scalable frontend, backend, database, and API structure.",
-  },
-  {
-    step: "03",
-    title: "Build & Iterate",
-    description:
-      "Develop features incrementally with clean code and continuous improvements.",
-  },
-  {
-    step: "04",
-    title: "Test & Deliver",
-    description:
-      "Test thoroughly, fix edge cases, optimize performance, and deliver a reliable product.",
   },
 ];
 
